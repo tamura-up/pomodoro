@@ -3,10 +3,12 @@ import {IconButton, Box, Button, Container, Paper, Typography} from '@mui/materi
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import {red, green, purple} from '@mui/material/colors';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {Iteration, IterationSet} from '@/lib/pomodro';
+import {Iteration, IterationSet, TaskConfig} from '@/lib/pomodro';
 import {useEffect, useState} from "react";
 
 import useInterval from 'use-interval'
+import {useAtom} from "jotai";
+import {bgcolorAtom} from "@/lib/jotaiAtom";
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -19,24 +21,54 @@ type IterationValue = {
     running: boolean;
 };
 
-const generateInitialIterationSet=()=>{
-   return new IterationSet() ;
-}
+const colors = {
+    'WORK': red["400"],
+    'BREAK': green["300"]
+};
 
 const Timer = () => {
+    const generateInitialIterationSet = () => {
+        return new IterationSet(new TaskConfig(),
+            () => {
+                finishWork()
+            });
+    }
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
     const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
+    const [_, setBGColorAtom] = useAtom(bgcolorAtom);
+    const [notification, setNotification] = useState(false);
+    useEffect(() => {
+        let timer:any;
+        if (notification) {
+            let no = 0;
+            timer = setInterval(() => {
+                no += 1;
+                setBGColorAtom(no % 2 ? colors['BREAK'] : '#FFF');
+            }, 500);
+            return () => {
+                clearInterval(timer);
+            };
+        }else{
+            if(!!timer) clearInterval(timer);
+            timer=undefined;
+        }
+    }, [notification]);
 
     useInterval(() => {
         const iteration = iterationSet.getCurrentIteration();
         setIterationValue({seconds: iteration.seconds, running: iteration.running});
+        if (!notification) {
+            setBGColorAtom(iterationSet.state == "WORK" ? colors['WORK'] : colors['BREAK']);
+        }
     }, 300);
 
 
     const startTimer = () => {
+        setNotification(false);
         iterationSet.getCurrentIteration().start();
     }
     const stopTimer = () => {
+        setNotification(false);
         iterationSet.getCurrentIteration().stop();
     }
 
@@ -55,25 +87,30 @@ const Timer = () => {
         }
     };
     const bgcolor = () => {
-        return iterationSet.state == "WORK" ? red["400"] : green["200"];
+        return iterationSet.state == "WORK" ? colors['WORK'] : colors['BREAK'];
     };
 
     const skipBreak = () => {
         iterationSet.goToNext();
-        // const iteration = iterationSet.getCurrentIteration();
-        // setIterationValue({seconds: iteration.seconds, running: iteration.running});
     }
 
     const onClickReset = () => {
         iterationSet.iteration.stop();
         setIterationSet(generateInitialIterationSet());
+        setNotification(false);
+    }
+
+    const finishWork = () => {
+        setNotification(true);
     }
 
     return (
-        <Paper sx={{
+        <Paper
+            elevation={5}
+            sx={{
             bgcolor: bgcolor(),
-            p: 2,
-            width: "500px",
+            p: 4,
+            width: "800px",
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
