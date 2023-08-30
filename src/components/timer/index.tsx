@@ -32,9 +32,10 @@ const playClickSound = () => {
     const sound = new Audio(clickSoundDataUri);
     sound.play();
 }
+
+const alermSoundDataUri = "data:audio/mp3;base64," + sound1;
+const sound = new Audio(alermSoundDataUri);
 const playSound = () => {
-    const alermSoundDataUri = "data:audio/mp3;base64," + sound1;
-    const sound = new Audio(alermSoundDataUri);
     sound.play();
 }
 
