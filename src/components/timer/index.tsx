@@ -125,7 +125,7 @@ const Timer = () => {
             sx={{
                 bgcolor: bgcolor(),
                 p: 4,
-                width: "800px",
+                width: "80vw",
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',

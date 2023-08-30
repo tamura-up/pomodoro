@@ -8,17 +8,16 @@ import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
 
 export default function Home() {
-    const [bgcolor]=useAtom(bgcolorAtom);
+    const [bgcolor] = useAtom(bgcolorAtom);
     return (
         <main>
             <Box sx={{
-                bgcolor:bgcolor,
+                bgcolor: bgcolor,
                 height: '100vh',
                 width: '100vw',
                 display: 'flex',
                 alignItems: 'center',
-                flexDirection: 'column',
-                pt:'100px',
+                justifyContent: 'center',
             }}>
                 <Timer/>
             </Box>
