@@ -9,6 +9,7 @@ import {useEffect, useState} from "react";
 import useInterval from 'use-interval'
 import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
+import {sound1} from "@/lib/sound";
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -26,19 +27,32 @@ const colors = {
     'BREAK': green["300"]
 };
 
+const soundDataUri = "data:audio/mp3;base64," + sound1;
+const playSound = () => {
+    const sound = new Audio(soundDataUri);
+    sound.play();
+}
+
 const Timer = () => {
     const generateInitialIterationSet = () => {
         return new IterationSet(new TaskConfig(),
             () => {
                 finishWork()
-            });
+            },
+            () => {
+                finishBreak()
+            },
+            () => {
+                finishBreak()
+            }
+        );
     }
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
     const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
     const [_, setBGColorAtom] = useAtom(bgcolorAtom);
     const [notification, setNotification] = useState(false);
     useEffect(() => {
-        let timer:any;
+        let timer: any;
         if (notification) {
             let no = 0;
             timer = setInterval(() => {
@@ -48,9 +62,9 @@ const Timer = () => {
             return () => {
                 clearInterval(timer);
             };
-        }else{
-            if(!!timer) clearInterval(timer);
-            timer=undefined;
+        } else {
+            if (!!timer) clearInterval(timer);
+            timer = undefined;
         }
     }, [notification]);
 
@@ -97,25 +111,34 @@ const Timer = () => {
     const onClickReset = () => {
         iterationSet.iteration.stop();
         setIterationSet(generateInitialIterationSet());
-        setNotification(false);
+        // setNotification(false);
     }
 
     const finishWork = () => {
+        playSound();
         setNotification(true);
+    }
+    const finishBreak = () => {
+        playSound();
+    }
+    const stopNotification = () => {
+        setNotification(false);
     }
 
     return (
         <Paper
             elevation={5}
             sx={{
-            bgcolor: bgcolor(),
-            p: 4,
-            width: "800px",
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            rowGap: '10px',
-        }}>
+                bgcolor: bgcolor(),
+                p: 4,
+                width: "800px",
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                rowGap: '10px',
+            }}
+            onClick={stopNotification}
+        >
             <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <Typography variant="h1" gutterBottom sx={{mb: 2}}>
                     {iterationValue ? formatTime(iterationValue.seconds) : ""}
