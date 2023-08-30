@@ -44,9 +44,9 @@ export class Iteration {
 }
 
 export class TaskConfig {
-    workInterval = 20;
-    shortBreakInterval = 5;
-    longBreakInterval = 20;
+    workInterval = 20*60;
+    shortBreakInterval = 5*60;
+    longBreakInterval = 20*60;
     longBreakAfterWork = 4;
 }
 
