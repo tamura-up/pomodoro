@@ -9,7 +9,7 @@ import {useEffect, useState} from "react";
 import useInterval from 'use-interval'
 import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
-import {sound1} from "@/lib/sound";
+import {clickSound, sound1} from "@/lib/sound";
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -27,9 +27,14 @@ const colors = {
     'BREAK': green["300"]
 };
 
-const soundDataUri = "data:audio/mp3;base64," + sound1;
+const playClickSound = () => {
+    const clickSoundDataUri = "data:audio/mp3;base64," + clickSound;
+    const sound = new Audio(clickSoundDataUri);
+    sound.play();
+}
 const playSound = () => {
-    const sound = new Audio(soundDataUri);
+    const alermSoundDataUri = "data:audio/mp3;base64," + sound1;
+    const sound = new Audio(alermSoundDataUri);
     sound.play();
 }
 
@@ -78,10 +83,12 @@ const Timer = () => {
 
 
     const startTimer = () => {
+        playClickSound();
         setNotification(false);
         iterationSet.getCurrentIteration().start();
     }
     const stopTimer = () => {
+        playClickSound();
         setNotification(false);
         iterationSet.getCurrentIteration().stop();
     }
