@@ -26,6 +26,7 @@ export class Iteration {
     }
 
     start() {
+        clearInterval(this.#intarvalID);
         this.#running = true;
         const startTime = new Date();
         const leftMilliSeconds = this.#miliseconds;
@@ -39,5 +40,74 @@ export class Iteration {
     finish() {
         this.stop();
         this.handler();
+    }
+}
+
+class TaskConfig {
+    workInterval = 5;
+    shortBreakInterval = 3;
+    longBreakInterval = 10;
+    longBreakAfterWork = 4;
+}
+
+
+type StateConfig = {
+    interval: number;
+    handler?: Function;
+};
+
+export class IterationSet {
+    workCount: number = 0;
+    state: string = "WORK";
+    iteration: Iteration;
+    stateConfig: Map<string, StateConfig>;
+    config: TaskConfig;
+
+    constructor(config: TaskConfig = new TaskConfig(),
+                finishWorkHandler?: Function,
+                finishShortBreakHandler?: Function,
+                finishLongBreakHandler?: Function,
+    ) {
+        this.stateConfig = new Map(
+            [
+                ["WORK", {interval: config.workInterval, handler: finishWorkHandler}],
+                ["SHORT_BREAK", {interval: config.shortBreakInterval, handler: finishShortBreakHandler}],
+                ["LONG_BREAK", {interval: config.longBreakInterval, handler: finishLongBreakHandler}],
+            ]
+        );
+        this.config = config;
+        this.iteration = new Iteration(config.workInterval, ()=>{this.finishEvent()});
+    }
+
+    finishEvent() {
+        const {handler} = this.stateConfig.get(this.state)!;
+        if (!!handler) {
+            handler();
+        }
+        this.changeNextState();
+    }
+
+    changeNextState() {
+        if (this.state == 'WORK') {
+            this.workCount += 1;
+            if (this.workCount % this.config.longBreakAfterWork == 0) {
+                this.state = 'LONG_BREAK';
+            } else {
+                this.state = 'SHORT_BREAK';
+            }
+        } else {
+            this.state = 'WORK';
+        }
+        const {interval} = this.stateConfig.get(this.state)!;
+        this.iteration = new Iteration(interval, ()=>{this.finishEvent()});
+    }
+
+    getCurrentIteration(){
+        return this.iteration;
+    }
+
+    goToNext(){
+        this.iteration.stop();
+        this.changeNextState();
     }
 }
