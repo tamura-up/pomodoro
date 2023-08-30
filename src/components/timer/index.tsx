@@ -19,11 +19,13 @@ type IterationValue = {
     running: boolean;
 };
 
+const generateInitialIterationSet=()=>{
+   return new IterationSet() ;
+}
+
 const Timer = () => {
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
-    const [iterationSet, setIterationSet] = useState(new IterationSet());
-    // useEffect(() => {
-    // }, [iterationSet]);
+    const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
 
     useInterval(() => {
         const iteration = iterationSet.getCurrentIteration();
@@ -58,8 +60,13 @@ const Timer = () => {
 
     const skipBreak = () => {
         iterationSet.goToNext();
-        const iteration = iterationSet.getCurrentIteration();
-        setIterationValue({seconds: iteration.seconds, running: iteration.running});
+        // const iteration = iterationSet.getCurrentIteration();
+        // setIterationValue({seconds: iteration.seconds, running: iteration.running});
+    }
+
+    const onClickReset = () => {
+        iterationSet.iteration.stop();
+        setIterationSet(generateInitialIterationSet());
     }
 
     return (
@@ -90,7 +97,8 @@ const Timer = () => {
                 }
             </Box>
             <Box sx={{width: "100%", textAlign: "right", pt: 3,}}>
-                <Button variant="contained" size="small" color="warning" startIcon={<DeleteIcon/>}>Reset</Button>
+                <Button variant="contained" size="small" color="warning" startIcon={<DeleteIcon/>}
+                        onClick={onClickReset}>Reset</Button>
             </Box>
         </Paper>
     );
