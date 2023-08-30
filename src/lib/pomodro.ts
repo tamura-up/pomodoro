@@ -62,6 +62,7 @@ export class IterationSet {
     iteration: Iteration;
     stateConfig: Map<string, StateConfig>;
     config: TaskConfig;
+    handler:Function|undefined;
 
     constructor(config: TaskConfig = new TaskConfig(),
                 finishWorkHandler?: Function,
@@ -80,7 +81,8 @@ export class IterationSet {
     }
 
     finishEvent() {
-        const {handler} = this.stateConfig.get(this.state)!;
+        // const {handler} = this.stateConfig.get(this.state)!;
+        const handler=this.handler;
         if (!!handler) {
             handler();
         }

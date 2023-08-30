@@ -27,19 +27,17 @@ const colors = {
     'BREAK': green["300"]
 };
 
+const clickSoundDataUri = "data:audio/mp3;base64," + clickSound;
+// const clickSoundElement = new Audio(clickSoundDataUri);
+
 const playClickSound = () => {
-    const clickSoundDataUri = "data:audio/mp3;base64," + clickSound;
-    const sound = new Audio(clickSoundDataUri);
-    sound.play();
+    // clickSoundElement.play();
 }
 
-const playSound = () => {
-    const alermSoundDataUri = "data:audio/mp3;base64," + sound1;
-    const sound = new Audio(alermSoundDataUri);
-    sound.play();
-}
+const alermSoundDataUri = "data:audio/mp3;base64," + sound1;
+// const alermSoundElement = new Audio(alermSoundDataUri);
 
-const playSound2=()=>{
+const playSound2 = () => {
     const alermSoundDataUri = "data:audio/mp3;base64," + sound2;
     const sound = new Audio(alermSoundDataUri);
     sound.play();
@@ -47,6 +45,7 @@ const playSound2=()=>{
 
 const Timer = () => {
     const generateInitialIterationSet = () => {
+
         return new IterationSet(new TaskConfig(),
             () => {
                 finishWork()
@@ -63,6 +62,7 @@ const Timer = () => {
     const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
     const [_, setBGColorAtom] = useAtom(bgcolorAtom);
     const [notification, setNotification] = useState(false);
+    const [alarmElement, setAlarmElement] = useState<any>(null);
     useEffect(() => {
         let timer: any;
         if (notification) {
@@ -90,9 +90,17 @@ const Timer = () => {
 
 
     const startTimer = () => {
+        const alarmSoundElement = new Audio(alermSoundDataUri);
+        console.log("a",alarmSoundElement)
+        setAlarmElement("test");
+
         playClickSound();
         setNotification(false);
         iterationSet.getCurrentIteration().start();
+        iterationSet.handler= ()=>{
+            console.log("chk",alarmSoundElement)
+            if (!!alarmSoundElement) alarmSoundElement.play();
+        };
     }
     const stopTimer = () => {
         playClickSound();
@@ -129,11 +137,13 @@ const Timer = () => {
     }
 
     const finishWork = () => {
-        playSound();
+        console.log(alarmElement)
+        if (!!alarmElement) alarmElement.play();
         setNotification(true);
     }
     const finishBreak = () => {
-        playSound2();
+        console.log(alarmElement)
+        if (!!alarmElement) alarmElement.play();
     }
     const stopNotification = () => {
         setNotification(false);
