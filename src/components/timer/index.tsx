@@ -126,7 +126,9 @@ const Timer = () => {
         setNotification(true);
     }
     const finishBreak = () => {
+        playClickSound();
         playSound();
+        setNotification(true);
     }
     const stopNotification = () => {
         setNotification(false);
