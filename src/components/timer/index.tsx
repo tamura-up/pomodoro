@@ -73,6 +73,7 @@ const Timer = () => {
         const alarm2SoundElement = new Audio(alerm2SoundDataUri);
         iterationSet.handlers = new Map([
             ["WORK", () => {
+                setNotification(true);
                 if (!!alarmSoundElement) alarmSoundElement.play();
             }],
             ["SHORT_BREAK", () => {
