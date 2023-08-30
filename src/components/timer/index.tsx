@@ -9,7 +9,7 @@ import {useEffect, useState} from "react";
 import useInterval from 'use-interval'
 import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
-import {clickSound, sound1, sound2} from "@/lib/sound";
+import {sound1, sound2} from "@/lib/sound";
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -27,36 +27,13 @@ const colors = {
     'BREAK': green["300"]
 };
 
-const clickSoundDataUri = "data:audio/mp3;base64," + clickSound;
-// const clickSoundElement = new Audio(clickSoundDataUri);
-
-const playClickSound = () => {
-    // clickSoundElement.play();
-}
-
-const alermSoundDataUri = "data:audio/mp3;base64," + sound1;
-// const alermSoundElement = new Audio(alermSoundDataUri);
-
-const playSound2 = () => {
-    const alermSoundDataUri = "data:audio/mp3;base64," + sound2;
-    const sound = new Audio(alermSoundDataUri);
-    sound.play();
-}
+const alerm1SoundDataUri = "data:audio/mp3;base64," + sound1;
+const alerm2SoundDataUri = "data:audio/mp3;base64," + sound2;
 
 const Timer = () => {
     const generateInitialIterationSet = () => {
 
-        return new IterationSet(new TaskConfig(),
-            () => {
-                finishWork()
-            },
-            () => {
-                finishBreak()
-            },
-            () => {
-                finishBreak()
-            }
-        );
+        return new IterationSet(new TaskConfig());
     }
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
     const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
@@ -90,21 +67,24 @@ const Timer = () => {
 
 
     const startTimer = () => {
-        const alarmSoundElement = new Audio(alermSoundDataUri);
-        console.log("a",alarmSoundElement)
-        setAlarmElement("test");
-
-        playClickSound();
-        setNotification(false);
+        // ipad対応のため、ボタンクリックのタイミングでオブジェクト生成
+        // https://webfrontend.ninja/js-audio-autoplay-policy-and-delay/
+        const alarmSoundElement = new Audio(alerm1SoundDataUri);
+        const alarm2SoundElement = new Audio(alerm2SoundDataUri);
+        iterationSet.handlers = new Map([
+            ["WORK", () => {
+                if (!!alarmSoundElement) alarmSoundElement.play();
+            }],
+            ["SHORT_BREAK", () => {
+                if (!!alarm2SoundElement) alarm2SoundElement.play();
+            }],
+            ["LONG_BREAK", () => {
+                if (!!alarm2SoundElement) alarm2SoundElement.play();
+            }],
+        ]);
         iterationSet.getCurrentIteration().start();
-        iterationSet.handler= ()=>{
-            console.log("chk",alarmSoundElement)
-            if (!!alarmSoundElement) alarmSoundElement.play();
-        };
     }
     const stopTimer = () => {
-        playClickSound();
-        setNotification(false);
         iterationSet.getCurrentIteration().stop();
     }
 
@@ -133,18 +113,8 @@ const Timer = () => {
     const onClickReset = () => {
         iterationSet.iteration.stop();
         setIterationSet(generateInitialIterationSet());
-        // setNotification(false);
     }
 
-    const finishWork = () => {
-        console.log(alarmElement)
-        if (!!alarmElement) alarmElement.play();
-        setNotification(true);
-    }
-    const finishBreak = () => {
-        console.log(alarmElement)
-        if (!!alarmElement) alarmElement.play();
-    }
     const stopNotification = () => {
         setNotification(false);
     }
@@ -160,6 +130,7 @@ const Timer = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 rowGap: '10px',
+                userSelect: 'none',
             }}
             onClick={stopNotification}
         >

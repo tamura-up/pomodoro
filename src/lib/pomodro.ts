@@ -53,7 +53,6 @@ export class TaskConfig {
 
 type StateConfig = {
     interval: number;
-    handler?: Function;
 };
 
 export class IterationSet {
@@ -62,27 +61,26 @@ export class IterationSet {
     iteration: Iteration;
     stateConfig: Map<string, StateConfig>;
     config: TaskConfig;
-    handler:Function|undefined;
+    handlers: Map<string, Function> | undefined;
 
-    constructor(config: TaskConfig = new TaskConfig(),
-                finishWorkHandler?: Function,
-                finishShortBreakHandler?: Function,
-                finishLongBreakHandler?: Function,
-    ) {
+    constructor(config: TaskConfig = new TaskConfig()) {
         this.stateConfig = new Map(
             [
-                ["WORK", {interval: config.workInterval, handler: finishWorkHandler}],
-                ["SHORT_BREAK", {interval: config.shortBreakInterval, handler: finishShortBreakHandler}],
-                ["LONG_BREAK", {interval: config.longBreakInterval, handler: finishLongBreakHandler}],
+                ["WORK", {interval: config.workInterval}],
+                ["SHORT_BREAK", {interval: config.shortBreakInterval}],
+                ["LONG_BREAK", {interval: config.longBreakInterval}],
             ]
         );
         this.config = config;
-        this.iteration = new Iteration(config.workInterval, ()=>{this.finishEvent()});
+        this.iteration = new Iteration(config.workInterval, () => {
+            this.finishEvent()
+        });
     }
 
     finishEvent() {
-        // const {handler} = this.stateConfig.get(this.state)!;
-        const handler=this.handler;
+        if (!this.handlers) return;
+
+        const handler = this.handlers.get(this.state);
         if (!!handler) {
             handler();
         }
@@ -101,14 +99,16 @@ export class IterationSet {
             this.state = 'WORK';
         }
         const {interval} = this.stateConfig.get(this.state)!;
-        this.iteration = new Iteration(interval, ()=>{this.finishEvent()});
+        this.iteration = new Iteration(interval, () => {
+            this.finishEvent()
+        });
     }
 
-    getCurrentIteration(){
+    getCurrentIteration() {
         return this.iteration;
     }
 
-    goToNext(){
+    goToNext() {
         this.iteration.stop();
         this.changeNextState();
     }
