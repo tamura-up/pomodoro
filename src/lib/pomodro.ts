@@ -43,6 +43,12 @@ export class Iteration {
     }
 }
 
+const pomodoroStates = ["WORK", "SHORT_BREAK", "LONG_BREAK"] as const
+type PomodoroStateType = (typeof pomodoroStates)[number];
+
+// const AllPomodoroState = Object.values(pomodoroStates);
+
+
 export class TaskConfig {
     workInterval = 3;
     shortBreakInterval = 3;
@@ -57,13 +63,14 @@ type StateConfig = {
 
 export class IterationSet {
     workCount: number = 0;
-    state: string = "WORK";
+    state: PomodoroStateType = "WORK";
     iteration: Iteration;
-    stateConfig: Map<string, StateConfig>;
+    stateConfig: Map<PomodoroStateType, StateConfig>;
     config: TaskConfig;
-    handlers: Map<string, Function> | undefined;
+    handlers?: Map<PomodoroStateType, Function> | undefined;
 
     constructor(config: TaskConfig = new TaskConfig()) {
+
         this.stateConfig = new Map(
             [
                 ["WORK", {interval: config.workInterval}],
@@ -78,11 +85,11 @@ export class IterationSet {
     }
 
     finishEvent() {
-        if (!this.handlers) return;
-
-        const handler = this.handlers.get(this.state);
-        if (!!handler) {
-            handler();
+        if (!!this.handlers) {
+            const handler = this.handlers.get(this.state);
+            if (!!handler) {
+                handler();
+            }
         }
         this.changeNextState();
     }

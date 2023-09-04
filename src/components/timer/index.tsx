@@ -43,9 +43,11 @@ const Timer = () => {
         let timer: any;
         if (blink) {
             let no = 0;
+            const color = iterationSet.state == 'WORK' ? colors['WORK'] : colors['BREAK'];
+            setBGColorAtom(color);
             timer = setInterval(() => {
+                setBGColorAtom(no % 2 ? color : '#FFF');
                 no += 1;
-                setBGColorAtom(no % 2 ? colors['BREAK'] : '#FFF');
             }, 500);
             return () => {
                 clearInterval(timer);
@@ -72,7 +74,7 @@ const Timer = () => {
         const alarm2SoundElement = new Audio(alarm2SoundDataUri);
         iterationSet.handlers = new Map([
             ["WORK", () => {
-               setBlink(true);
+                setBlink(true);
                 if (!!alarmSoundElement) alarmSoundElement.play();
             }],
             ["SHORT_BREAK", () => {
