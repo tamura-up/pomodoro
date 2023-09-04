@@ -49,13 +49,18 @@ type PomodoroStateType = (typeof pomodoroStates)[number];
 // const AllPomodoroState = Object.values(pomodoroStates);
 
 
-export class TaskConfig {
-    workInterval = 3;
-    shortBreakInterval = 3;
-    longBreakInterval = 5;
-    longBreakAfterWork = 2;
-}
-
+type PomodoroConfigType = {
+    workInterval: number;
+    shortBreakInterval: number;
+    longBreakInterval: number;
+    longBreakAfterWork: number;
+};
+const defaultPomodoroConfig: PomodoroConfigType = {
+    workInterval: +(25 * 60),
+    shortBreakInterval: +(5 * 60),
+    longBreakInterval: +(25 * 60),
+    longBreakAfterWork: +(5),
+};
 
 type StateConfig = {
     interval: number;
@@ -66,10 +71,13 @@ export class IterationSet {
     state: PomodoroStateType = "WORK";
     iteration: Iteration;
     stateConfig: Map<PomodoroStateType, StateConfig>;
-    config: TaskConfig;
+    config: PomodoroConfigType;
     handlers?: Map<PomodoroStateType, Function> | undefined;
 
-    constructor(config: TaskConfig = new TaskConfig()) {
+    constructor(config?: PomodoroConfigType) {
+        if (config == undefined) {
+            config = defaultPomodoroConfig;
+        }
 
         this.stateConfig = new Map(
             [

@@ -2,7 +2,7 @@
 import {Box, Button, IconButton, Paper, Typography} from '@mui/material';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {IterationSet, TaskConfig} from '@/lib/pomodro';
+import {IterationSet} from '@/lib/pomodro';
 import {useEffect, useState} from "react";
 
 import useInterval from 'use-interval'
@@ -30,13 +30,19 @@ const colors = {
 const alarm1SoundDataUri = "data:audio/mp3;base64," + sound1;
 const alarm2SoundDataUri = "data:audio/mp3;base64," + sound2;
 
-const Timer = () => {
-    const generateInitialIterationSet = () => {
 
-        return new IterationSet(new TaskConfig());
-    }
+const generateInitialIterationSet = () => {
+    return new IterationSet({
+        longBreakAfterWork: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 5),
+        longBreakInterval: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 25 * 60),
+        shortBreakInterval: +(process.env["NEXT_PUBLIC_SHORT_BREAK_INTERVAL"] || 5 * 60),
+        workInterval: +(process.env["NEXT_PUBLIC_WORK_INTERVAL"] || 25 * 60)
+    });
+}
+const defaultIterationSet = generateInitialIterationSet();
+const Timer = () => {
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
-    const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
+    const [iterationSet, setIterationSet] = useState(defaultIterationSet);
     const [_, setBGColorAtom] = useAtom(bgcolorAtom);
     const [blink, setBlink] = useState(false);
     useEffect(() => {
