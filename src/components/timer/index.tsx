@@ -10,6 +10,7 @@ import useInterval from 'use-interval'
 import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
 import {sound1, sound2} from "@/lib/sound";
+import { Colors } from '@/lib/constant';
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -23,12 +24,12 @@ type IterationValue = {
 };
 
 const colors = {
-    'WORK': red["400"],
-    'BREAK': green["300"]
+    'WORK': Colors.red,
+    'BREAK': Colors.green,
 };
 
-const alerm1SoundDataUri = "data:audio/mp3;base64," + sound1;
-const alerm2SoundDataUri = "data:audio/mp3;base64," + sound2;
+const alarm1SoundDataUri = "data:audio/mp3;base64," + sound1;
+const alarm2SoundDataUri = "data:audio/mp3;base64," + sound2;
 
 const Timer = () => {
     const generateInitialIterationSet = () => {
@@ -38,11 +39,10 @@ const Timer = () => {
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
     const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
     const [_, setBGColorAtom] = useAtom(bgcolorAtom);
-    const [notification, setNotification] = useState(false);
-    const [alarmElement, setAlarmElement] = useState<any>(null);
+    const [blink, setBlink] = useState(false);
     useEffect(() => {
         let timer: any;
-        if (notification) {
+        if (blink) {
             let no = 0;
             timer = setInterval(() => {
                 no += 1;
@@ -55,22 +55,22 @@ const Timer = () => {
             if (!!timer) clearInterval(timer);
             timer = undefined;
         }
-    }, [notification]);
+    }, [blink]);
 
     useInterval(() => {
         const iteration = iterationSet.getCurrentIteration();
         setIterationValue({seconds: iteration.seconds, running: iteration.running});
-        if (!notification) {
+        if (!blink) {
             setBGColorAtom(iterationSet.state == "WORK" ? colors['WORK'] : colors['BREAK']);
         }
-    }, 300);
+    }, 200);
 
 
     const startTimer = () => {
         // ipad対応のため、ボタンクリックのタイミングでオブジェクト生成
         // https://webfrontend.ninja/js-audio-autoplay-policy-and-delay/
-        const alarmSoundElement = new Audio(alerm1SoundDataUri);
-        const alarm2SoundElement = new Audio(alerm2SoundDataUri);
+        const alarmSoundElement = new Audio(alarm1SoundDataUri);
+        const alarm2SoundElement = new Audio(alarm2SoundDataUri);
         iterationSet.handlers = new Map([
             ["WORK", () => {
                 if (!!alarmSoundElement) alarmSoundElement.play();
@@ -116,7 +116,7 @@ const Timer = () => {
     }
 
     const stopNotification = () => {
-        setNotification(false);
+        setBlink(false);
     }
 
     return (

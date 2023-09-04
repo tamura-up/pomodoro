@@ -1,4 +1,4 @@
 import {atom} from 'jotai';
-import {red} from '@mui/material/colors';
+import {Colors} from "@/lib/constant";
 
-export const bgcolorAtom = atom<string>(red[200]);
+export const bgcolorAtom = atom<string>(Colors.red);

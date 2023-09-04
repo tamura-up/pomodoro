@@ -34,7 +34,7 @@ export class Iteration {
             let diff = differenceInMilliseconds(new Date(), startTime);
             this.#miliseconds = (leftMilliSeconds - diff < 0) ? 0 : leftMilliSeconds - diff;
             if (this.#miliseconds <= 0) this.finish();
-        }, 300);
+        }, 100);
     }
 
     finish() {
@@ -44,10 +44,10 @@ export class Iteration {
 }
 
 export class TaskConfig {
-    workInterval = 20*60;
-    shortBreakInterval = 5*60;
-    longBreakInterval = 20*60;
-    longBreakAfterWork = 4;
+    workInterval = 3;
+    shortBreakInterval = 3;
+    longBreakInterval = 5;
+    longBreakAfterWork = 2;
 }
 
 
