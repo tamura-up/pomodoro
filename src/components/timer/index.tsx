@@ -1,16 +1,15 @@
 "use client"
-import {IconButton, Box, Button, Container, Paper, Typography} from '@mui/material';
+import {Box, Button, IconButton, Paper, Typography} from '@mui/material';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
-import {red, green, purple} from '@mui/material/colors';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {Iteration, IterationSet, TaskConfig} from '@/lib/pomodro';
+import {IterationSet, TaskConfig} from '@/lib/pomodro';
 import {useEffect, useState} from "react";
 
 import useInterval from 'use-interval'
 import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
 import {sound1, sound2} from "@/lib/sound";
-import { Colors } from '@/lib/constant';
+import {Colors} from '@/lib/constant';
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -73,13 +72,15 @@ const Timer = () => {
         const alarm2SoundElement = new Audio(alarm2SoundDataUri);
         iterationSet.handlers = new Map([
             ["WORK", () => {
-                setNotification(true);
+               setBlink(true);
                 if (!!alarmSoundElement) alarmSoundElement.play();
             }],
             ["SHORT_BREAK", () => {
+                setBlink(true);
                 if (!!alarm2SoundElement) alarm2SoundElement.play();
             }],
             ["LONG_BREAK", () => {
+                setBlink(true);
                 if (!!alarm2SoundElement) alarm2SoundElement.play();
             }],
         ]);
