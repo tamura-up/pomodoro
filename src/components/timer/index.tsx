@@ -1,15 +1,15 @@
 "use client"
-import {IconButton, Box, Button, Container, Paper, Typography} from '@mui/material';
+import {Box, Button, IconButton, Paper, Typography} from '@mui/material';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
-import {red, green, purple} from '@mui/material/colors';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {Iteration, IterationSet, TaskConfig} from '@/lib/pomodro';
+import {IterationSet} from '@/lib/pomodro';
 import {useEffect, useState} from "react";
 
 import useInterval from 'use-interval'
 import {useAtom} from "jotai";
 import {bgcolorAtom} from "@/lib/jotaiAtom";
 import {sound1, sound2} from "@/lib/sound";
+import {Colors} from '@/lib/constant';
 
 const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -23,30 +23,37 @@ type IterationValue = {
 };
 
 const colors = {
-    'WORK': red["400"],
-    'BREAK': green["300"]
+    'WORK': Colors.red,
+    'BREAK': Colors.green,
 };
 
-const alerm1SoundDataUri = "data:audio/mp3;base64," + sound1;
-const alerm2SoundDataUri = "data:audio/mp3;base64," + sound2;
+const alarm1SoundDataUri = "data:audio/mp3;base64," + sound1;
+const alarm2SoundDataUri = "data:audio/mp3;base64," + sound2;
 
+
+const generateInitialIterationSet = () => {
+    return new IterationSet({
+        longBreakAfterWork: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 5),
+        longBreakInterval: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 25 * 60),
+        shortBreakInterval: +(process.env["NEXT_PUBLIC_SHORT_BREAK_INTERVAL"] || 5 * 60),
+        workInterval: +(process.env["NEXT_PUBLIC_WORK_INTERVAL"] || 25 * 60)
+    });
+}
+const defaultIterationSet = generateInitialIterationSet();
 const Timer = () => {
-    const generateInitialIterationSet = () => {
-
-        return new IterationSet(new TaskConfig());
-    }
     const [iterationValue, setIterationValue] = useState<IterationValue | null>(null);
-    const [iterationSet, setIterationSet] = useState(generateInitialIterationSet());
+    const [iterationSet, setIterationSet] = useState(defaultIterationSet);
     const [_, setBGColorAtom] = useAtom(bgcolorAtom);
-    const [notification, setNotification] = useState(false);
-    const [alarmElement, setAlarmElement] = useState<any>(null);
+    const [blink, setBlink] = useState(false);
     useEffect(() => {
         let timer: any;
-        if (notification) {
+        if (blink) {
             let no = 0;
+            const color = iterationSet.state == 'WORK' ? colors['WORK'] : colors['BREAK'];
+            setBGColorAtom(color);
             timer = setInterval(() => {
+                setBGColorAtom(no % 2 ? color : '#FFF');
                 no += 1;
-                setBGColorAtom(no % 2 ? colors['BREAK'] : '#FFF');
             }, 500);
             return () => {
                 clearInterval(timer);
@@ -55,31 +62,33 @@ const Timer = () => {
             if (!!timer) clearInterval(timer);
             timer = undefined;
         }
-    }, [notification]);
+    }, [blink]);
 
     useInterval(() => {
         const iteration = iterationSet.getCurrentIteration();
         setIterationValue({seconds: iteration.seconds, running: iteration.running});
-        if (!notification) {
+        if (!blink) {
             setBGColorAtom(iterationSet.state == "WORK" ? colors['WORK'] : colors['BREAK']);
         }
-    }, 300);
+    }, 200);
 
 
     const startTimer = () => {
         // ipad対応のため、ボタンクリックのタイミングでオブジェクト生成
         // https://webfrontend.ninja/js-audio-autoplay-policy-and-delay/
-        const alarmSoundElement = new Audio(alerm1SoundDataUri);
-        const alarm2SoundElement = new Audio(alerm2SoundDataUri);
+        const alarmSoundElement = new Audio(alarm1SoundDataUri);
+        const alarm2SoundElement = new Audio(alarm2SoundDataUri);
         iterationSet.handlers = new Map([
             ["WORK", () => {
-                setNotification(true);
+                setBlink(true);
                 if (!!alarmSoundElement) alarmSoundElement.play();
             }],
             ["SHORT_BREAK", () => {
+                setBlink(true);
                 if (!!alarm2SoundElement) alarm2SoundElement.play();
             }],
             ["LONG_BREAK", () => {
+                setBlink(true);
                 if (!!alarm2SoundElement) alarm2SoundElement.play();
             }],
         ]);
@@ -117,7 +126,7 @@ const Timer = () => {
     }
 
     const stopNotification = () => {
-        setNotification(false);
+        setBlink(false);
     }
 
     return (

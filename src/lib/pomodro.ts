@@ -34,7 +34,7 @@ export class Iteration {
             let diff = differenceInMilliseconds(new Date(), startTime);
             this.#miliseconds = (leftMilliSeconds - diff < 0) ? 0 : leftMilliSeconds - diff;
             if (this.#miliseconds <= 0) this.finish();
-        }, 300);
+        }, 100);
     }
 
     finish() {
@@ -43,13 +43,24 @@ export class Iteration {
     }
 }
 
-export class TaskConfig {
-    workInterval = 25*60;
-    shortBreakInterval = 5*60;
-    longBreakInterval = 20*60;
-    longBreakAfterWork = 4;
-}
+const pomodoroStates = ["WORK", "SHORT_BREAK", "LONG_BREAK"] as const
+type PomodoroStateType = (typeof pomodoroStates)[number];
 
+// const AllPomodoroState = Object.values(pomodoroStates);
+
+
+type PomodoroConfigType = {
+    workInterval: number;
+    shortBreakInterval: number;
+    longBreakInterval: number;
+    longBreakAfterWork: number;
+};
+const defaultPomodoroConfig: PomodoroConfigType = {
+    workInterval: +(25 * 60),
+    shortBreakInterval: +(5 * 60),
+    longBreakInterval: +(25 * 60),
+    longBreakAfterWork: +(5),
+};
 
 type StateConfig = {
     interval: number;
@@ -57,13 +68,17 @@ type StateConfig = {
 
 export class IterationSet {
     workCount: number = 0;
-    state: string = "WORK";
+    state: PomodoroStateType = "WORK";
     iteration: Iteration;
-    stateConfig: Map<string, StateConfig>;
-    config: TaskConfig;
-    handlers: Map<string, Function> | undefined;
+    stateConfig: Map<PomodoroStateType, StateConfig>;
+    config: PomodoroConfigType;
+    handlers?: Map<PomodoroStateType, Function> | undefined;
 
-    constructor(config: TaskConfig = new TaskConfig()) {
+    constructor(config?: PomodoroConfigType) {
+        if (config == undefined) {
+            config = defaultPomodoroConfig;
+        }
+
         this.stateConfig = new Map(
             [
                 ["WORK", {interval: config.workInterval}],
@@ -78,11 +93,11 @@ export class IterationSet {
     }
 
     finishEvent() {
-        if (!this.handlers) return;
-
-        const handler = this.handlers.get(this.state);
-        if (!!handler) {
-            handler();
+        if (!!this.handlers) {
+            const handler = this.handlers.get(this.state);
+            if (!!handler) {
+                handler();
+            }
         }
         this.changeNextState();
     }
