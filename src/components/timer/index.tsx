@@ -33,10 +33,10 @@ const alarm2SoundDataUri = "data:audio/mp3;base64," + sound2;
 
 const generateInitialIterationSet = () => {
     return new IterationSet({
-        longBreakAfterWork: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 5),
-        longBreakInterval: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 25 * 60),
+        workInterval: +(process.env["NEXT_PUBLIC_WORK_INTERVAL"] || 25 * 60),
+        longBreakInterval: +(process.env["NEXT_PUBLIC_LONG_BREAK_INTERVAL"] || 20 * 60),
         shortBreakInterval: +(process.env["NEXT_PUBLIC_SHORT_BREAK_INTERVAL"] || 5 * 60),
-        workInterval: +(process.env["NEXT_PUBLIC_WORK_INTERVAL"] || 25 * 60)
+        longBreakAfterWork: +(process.env["NEXT_PUBLIC_LONG_BREAK_AFTER_WORK"] || 4),
     });
 }
 const defaultIterationSet = generateInitialIterationSet();

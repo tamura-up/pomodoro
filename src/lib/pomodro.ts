@@ -59,7 +59,7 @@ const defaultPomodoroConfig: PomodoroConfigType = {
     workInterval: +(25 * 60),
     shortBreakInterval: +(5 * 60),
     longBreakInterval: +(25 * 60),
-    longBreakAfterWork: +(5),
+    longBreakAfterWork: +(4),
 };
 
 type StateConfig = {
